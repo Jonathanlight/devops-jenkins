@@ -1,5 +1,5 @@
 
-FROM jenkins:2.60.3
+FROM jenkins/jenkins:2.166
 
 USER root
 RUN apt-get update && apt-get install curl -y
