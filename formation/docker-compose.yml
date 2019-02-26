@@ -1,48 +1,90 @@
 version: '3'
 
 networks:
- private:
- web:
-  external:
-   name: web
+  private:
+  web:
+    external:
+      name: web
 
 services:
- traefik:
-  image: traefik:maroilles-alpine
-  ports:
-   - 80:80
-  volumes:
-   - /var/run/docker.sock:/var/run/docker.sock
-  networks:
-   - web
-  command: "
-   -c /dev/null
-   --web=true
-   --web.readonly=true
-   --web.statistics=true
-   --web.statistics.error=100
-   --docker
-   --docker.watch=true
-   --docker.exposedbydefault=false
-   --logLevel=INFO"
-  labels:
-   - "traeik.enable=true"
-   - "traefik.frontend.rule=Host:traefik.server.com"
-   - "traefik.port=8080"
-   - "traefik.docker.network=web"  
-  restart: always
- jenkins:
-  build: images/jenkins
-  volumes:
-   - /var/run/docker.sock:/var/run/docker.sock 
-   - ./data/jenkins:/var/jenkins_home
-  networks:
-   - web
-   - private
-  labels:
-   - "traeik.enable=true"
-   - "traefik.frontend.rule=Host:jenkins.server.com"
-   - "traefik.port=8080"
-   - "traefik.docker.network=web"
-  restart: always
+#========================================================
+# Traefik
+#========================================================  
+  traefik:
+    image: traefik:maroilles-alpine
+    ports:
+      - 80:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - web
+    command: "
+      -c /dev/null
+      --web=true
+      --web.readonly=true
+      --web.statistics=true
+      --web.statistics.error=100
+      --docker
+      --docker.watch=true
+      --docker.exposedbydefault=false
+      --logLevel=INFO"
+    labels:
+      - "traeik.enable=true"
+      - "traefik.frontend.rule=Host:traefik.server.com"
+      - "traefik.port=8080"
+      - "traefik.docker.network=web"
+    restart: always
+
+#========================================================
+# Gogs
+#========================================================
+  gogs-db:
+    images: postgres:11-alpine
+    volumes:
+      - .data/gogs/postgres:/var/lib/postgres/data
+    networks:
+      - private
+    environment:
+      - POSTGRES_DB=gogs
+      - POSTGRES_USER=gogs
+      - POSTGRES_PASSWORD=gogs  
+    restart: always
+
+  gogs:
+    images: gogs/gogs:0.11.86
+    ports:
+      - 2222:2222
+    volumes:
+      - ./data/gogs/data:/data
+    networks:
+      - web
+      - private
+    depends_on:
+      - gogs-db
+    links: 
+      - gogs-db   
+    labels:
+      - "traeik.enable=true"
+      - "traefik.frontend.rule=Host:gogs.server.com"
+      - "traefik.port=8080"
+      - "traefik.docker.network=web"
+    restart: always       
+
+#========================================================
+# Jenkins
+#========================================================
+  jenkins:
+    build: images/jenkins
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock 
+      - ./data/jenkins:/var/jenkins_home
+    networks:
+      - web
+      - private
+    labels:
+      - "traeik.enable=true"
+      - "traefik.frontend.rule=Host:jenkins.server.com"
+      - "traefik.port=8080"
+      - "traefik.docker.network=web"
+    restart: always
  
