@@ -1,0 +1,48 @@
+version: '3'
+
+networks:
+ private:
+ web:
+  external:
+   name: web
+
+services:
+ traefik:
+  image: traefik:maroilles-alpine
+  ports:
+   - 80:80
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+  networks:
+   - web
+  command: "
+   -c /dev/null
+   --web=true
+   --web.readonly=true
+   --web.statistics=true
+   --web.statistics.error=100
+   --docker
+   --docker.watch=true
+   --docker.exposedbydefault=false
+   --logLevel=INFO"
+  labels:
+   - "traeik.enable=true"
+   - "traefik.frontend.rule=Host:traefik.server.com"
+   - "traefik.port=8080"
+   - "traefik.docker.network=web"  
+  restart: always
+ jenkins:
+  build: images/jenkins
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock 
+   - ./data/jenkins:/var/jenkins_home
+  networks:
+   - web
+   - private
+  labels:
+   - "traeik.enable=true"
+   - "traefik.frontend.rule=Host:jenkins.server.com"
+   - "traefik.port=8080"
+   - "traefik.docker.network=web"
+  restart: always
+ 
