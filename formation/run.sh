@@ -1,4 +1,8 @@
 
+
+# Enabled debug
+set -x
+
 # Checked if folder isset or create folder
 #------------------------------------------------------
 if [ ! -d $(pwd)/data ]
@@ -26,3 +30,5 @@ truncate -s 0 /var/lib/docker/containers/*/*-json.log
 #----------------------------------------------------------
 docker-compose up --build -d
 
+# Disable debug
+set +x
