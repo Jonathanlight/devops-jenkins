@@ -13,7 +13,7 @@ services:
   traefik:
     image: traefik:maroilles-alpine
     ports:
-      - 80:80
+      - 9001:80
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
@@ -23,15 +23,15 @@ services:
       --web=true
       --web.readonly=true
       --web.statistics=true
-      --web.statistics.error=100
+      --web.statistics.recenterrors=100
       --docker
       --docker.watch=true
       --docker.exposedbydefault=false
       --logLevel=INFO"
     labels:
       - "traeik.enable=true"
-      - "traefik.frontend.rule=Host:traefik.server.com"
-      - "traefik.port=8080"
+      - "traefik.frontend.rule=Host:ec2-3-86-96-105.compute-1.amazonaws.com"
+      - "traefik.port=9001"
       - "traefik.docker.network=web"
     restart: always
 
@@ -39,7 +39,7 @@ services:
 # Gogs
 #========================================================
   gogs-db:
-    images: postgres:11-alpine
+    image: postgres:11-alpine
     volumes:
       - .data/gogs/postgres:/var/lib/postgres/data
     networks:
@@ -51,7 +51,7 @@ services:
     restart: always
 
   gogs:
-    images: gogs/gogs:0.11.86
+    image: gogs/gogs:0.11.86
     ports:
       - 2222:2222
     volumes:
@@ -65,8 +65,8 @@ services:
       - gogs-db   
     labels:
       - "traeik.enable=true"
-      - "traefik.frontend.rule=Host:gogs.server.com"
-      - "traefik.port=8080"
+      - "traefik.frontend.rule=Host:ec2-3-86-96-105.compute-1.amazonaws.com"
+      - "traefik.port=9002"
       - "traefik.docker.network=web"
     restart: always       
 
@@ -83,8 +83,8 @@ services:
       - private
     labels:
       - "traeik.enable=true"
-      - "traefik.frontend.rule=Host:jenkins.server.com"
-      - "traefik.port=8080"
+      - "traefik.frontend.rule=Host:ec2-3-86-96-105.compute-1.amazonaws.com"
+      - "traefik.port=9003"
       - "traefik.docker.network=web"
     restart: always
  

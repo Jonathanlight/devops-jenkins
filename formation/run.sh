@@ -24,7 +24,7 @@ chown 1000 -R $(pwd)/data/jenkins
 # Stop all container + clean logs
 #---------------------------------------------------------
 docker-compose stop
-truncate -s 0 /var/lib/docker/containers/*/*-json.log
+#truncate -s 0 /var/lib/docker/containers/*/*-json.log
 
 # Restart all containers
 #----------------------------------------------------------
